@@ -14,48 +14,68 @@ from oauth_provider.oauth import OAuthError
 import util
 import models
 
-# Decorator for validating an oauth request and storing the OAuthMap for use
-# in the rest of the request.
-#
-# If oauth credentials don't pass, return an error.
 def oauth_required(require_anointed_consumer = False):
+    """ Decorator for validating an authenticated request.
+
+    There are two possible cases of valid requests:
+        1. using Oauth with valid tokens
+        2. using cookie auth with a valid XSRF token presented in a header
+
+    If a valid user is not retrieved from either of the two methods, an error
+    is returned.
+
+    """
     def outer_wrapper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             if is_valid_request(request):
                 try:
                     consumer, token, parameters = validate_token(request)
-                    if consumer and token:
+                    if not (consumer or token):
+                        return oauth_error_response(OAuthError(
+                                "Not valid consumer or token"))
+                    # If this API method requires an anointed consumer,
+                    # restrict any that haven't been manually approved.
+                    if require_anointed_consumer and not consumer.anointed:
+                        return oauth_error_response(OAuthError(
+                                "Consumer access denied."))
 
-                        # If this API method requires an anointed consumer,
-                        # restrict any that haven't been manually approved.
-                        if require_anointed_consumer and not consumer.anointed:
-                            return oauth_error_response(OAuthError("Consumer access denied."))
+                    # Store the OAuthMap containing all auth info in the request
+                    # global for easy access during the rest of this request.
+                    flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
-                        # Store the OAuthMap containing all auth info in the request global
-                        # for easy access during the rest of this request.
-                        flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
-
-                        if not util.get_current_user_id():
-                            # If our OAuth provider thinks you're logged in but the 
-                            # identity providers we consume (Google/Facebook) disagree,
-                            # we act as if our token is no longer valid.
-                            return oauth_error_response(OAuthError("Unable to get current user from oauth token."))
-
-                        return func(*args, **kwargs)
+                    if not util.get_current_user_id():
+                        # If our OAuth provider thinks you're logged in but the
+                        # identity providers we consume (Google/Facebook)
+                        # disagree, we act as if our token is no longer valid.
+                        return oauth_error_response(OAuthError(
+                            "Unable to get current user from oauth token"))
 
                 except OAuthError, e:
                     return oauth_error_response(e)
 
-            return oauth_error_response(OAuthError("Invalid OAuth parameters"))
+            elif util.allow_cookie_based_auth():
+                if not util.get_current_user_id_from_cookies_unsafe():
+                    return oauth_error_response(OAuthError(
+                            "Unable to read user value from cookies"))
+            else:
+                return oauth_error_response(OAuthError(
+                        "Invalid parameters to Oauth request"))
+
+            # Request validated - proceed with the method.
+            return func(*args, **kwargs)
+
         return wrapper
     return outer_wrapper
 
-# Decorator for validating an oauth request and storing the OAuthMap for use
-# in the rest of the request.
-#
-# If oauth credentials don't pass, continue on, but util.get_current_user_id() will return None.
 def oauth_optional():
+    """ Decorator for validating an oauth request and storing the OAuthMap for use
+    in the rest of the request.
+
+    If oauth credentials don't pass, continue on,
+    but util.get_current_user_id() may return None.
+
+    """
     def outer_wrapper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -69,7 +89,7 @@ def oauth_optional():
                         flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
                         if not util.get_current_user_id():
-                            # If our OAuth provider thinks you're logged in but the 
+                            # If our OAuth provider thinks you're logged in but the
                             # identity providers we consume (Google/Facebook) disagree,
                             # we act as if our token is no longer valid.
                             flask.g.oauth_map = None
@@ -94,7 +114,7 @@ def admin_required(func):
 
         if user_data and users.is_current_user_admin():
             return func(*args, **kwargs)
-    
+
         return unauthorized_response()
     return wrapper
 
@@ -105,7 +125,7 @@ def developer_required(func):
 
         if user_data and (users.is_current_user_admin() or user_data.developer):
             return func(*args, **kwargs)
-    
+
         return unauthorized_response()
     return wrapper
 
