@@ -129,10 +129,10 @@ var gae_bingo = (function() {
 
     if( $.isArray( conversion ) ) {
       $.each( conversion, function( i, v ) {
-        post_conversion( stringify( v ) );
+        post_conversion( v );
       });
     } else {
-      post_conversion( stringify( conversion ) );
+      post_conversion( conversion );
     }
 
 

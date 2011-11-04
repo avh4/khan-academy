@@ -433,6 +433,43 @@ def user_exercises_specific(exercise_name):
 
     return None
 
+@route("/api/v1/user/exercises/<exercise_name>/followup_exercises", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def user_exercises_specific(exercise_name):
+    user_data = models.UserData.current()
+
+    if user_data and exercise_name:
+
+        user_data_student = get_visible_user_data_from_request()
+        user_exercise_graph = models.UserExerciseGraph.get(user_data)
+
+        user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
+        followup_exercises = models.Exercise.get_by_name(exercise_name).followup_exercises()
+
+        followup_exercises_dict = dict((exercise.name, exercise) for exercise in followup_exercises)
+        user_exercises_dict = dict((user_exercise.exercise, user_exercise) for user_exercise in user_exercises
+                                                                            if user_exercise in followup_exercises)
+
+        # create user_exercises that haven't been attempted yet
+        for exercise_name in followup_exercises_dict:
+            if not exercise_name in user_exercises_dict:
+                user_exercise = models.UserExercise()
+                user_exercise.exercise = exercise_name
+                user_exercise.user = user_data_student.user
+                user_exercises_dict[exercise_name] = user_exercise
+
+        for exercise_name in user_exercises_dict:
+            if exercise_name in followup_exercises_dict:
+                user_exercises_dict[exercise_name].exercise_model = followup_exercises_dict[exercise_name]
+                user_exercises_dict[exercise_name]._user_data = user_data_student
+                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
+
+        return user_exercises_dict.values()
+
+    return None
+
 @route("/api/v1/user/playlists", methods=["GET"])
 @oauth_required()
 @jsonp
