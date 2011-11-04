@@ -55,3 +55,10 @@ queue:
   acl:
   - user_email: james@khanacademy.org
 
+- name: test-pull-queue
+  model: pull
+  rate: 1/s
+  acl:
+  - user_email: james@khanacademy.org
+
+
