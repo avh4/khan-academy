@@ -39,6 +39,11 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         if self.request.params.has_key("clearcache"):
             self.clearCache()
        
+        if self.request.path == "/robots.txt":
+            self.response.headers["Content-Type"]="text/plain"
+            self.response.out.write("User-agent: *\r\nDisallow:")
+            return
+
         #redirect file back to smarthistory.org if the file is an audio/video and hence might be too big to store in blobstore
         extension = self.request.path[self.request.path.rfind(".") + 1:]
         if extension.lower() in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v", "swf"):

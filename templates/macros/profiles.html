@@ -19,7 +19,7 @@
 {% macro graph_calendar_picker(user_data, graph_type) -%}
 <input type="text" id="targetDatepicker" value="Today"/>
 <script>
-    $(function(){$("#targetDatepicker").datepicker().change(function(){Profile.loadGraph("/profile/graph/{{ graph_type|escape }}?coach_email={{ user_data.email|escape }}&dt=" + this.value);});});
+    $(function(){$("#targetDatepicker").datepicker().change(function(){Profile.loadGraphStudentListAware("/profile/graph/{{ graph_type|escape }}?coach_email={{ user_data.email|escape }}&dt=" + this.value);});});
 </script>
 {%- endmacro %}
 

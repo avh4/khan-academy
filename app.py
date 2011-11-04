@@ -1,8 +1,4 @@
-import datetime
 import os
-import logging
-
-from google.appengine.api import users
 
 try:
     import secrets

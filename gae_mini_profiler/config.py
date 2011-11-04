@@ -3,19 +3,22 @@ from google.appengine.api import users
 # If using the default should_profile implementation, the profiler
 # will only be enabled for requests made by the following GAE users.
 enabled_profiler_emails = [
-    "kamens@gmail.com",
+    "benkomalo@gmail.com",
+    "davidhu91@gmail.com",
+    "dmnd@desmondbrand.com",
+    "jace.kohlmeier@gmail.com",
     "jasonrosoff@gmail.com",
     "joelburget@gmail.com",
-    "dmnd@desmondbrand.com",
+    "kamens@gmail.com",
     "marcia.lee@gmail.com",
-    "spicyjalapeno@gmail.com", # Ben Alpert
-    "ParkerKuivila@gmail.com",
-    "jace.kohlmeier@gmail.com",
-    "davidhu91@gmail.com",
     "marcos@khanacademy.org",
-    "tallnerd@gmail.com", # James Irwin
     "netzen@gmail.com", # Brian Bondy
+    "ParkerKuivila@gmail.com",
+    "spicyjalapeno@gmail.com", # Ben Alpert
+    "tallnerd@gmail.com", # James Irwin
     "tom@khanacademy.org",
+    "sundar@khanacademy.org",
+    "shantanu@khanacademy.org",
 ]
 
 # Customize should_profile to return true whenever a request should be profiled.

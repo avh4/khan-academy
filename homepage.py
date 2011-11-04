@@ -124,7 +124,8 @@ def new_and_noteworthy_link_sets():
 class ViewHomePage(request_handler.RequestHandler):
 
     def head(self):
-        # Respond to HEAD requests for our homepage so twitter's tweet counter will update:
+        # Respond to HEAD requests for our homepage so twitter's tweet
+        # counter will update:
         # https://dev.twitter.com/docs/tweet-button/faq#count-api-increment
         pass
 
@@ -135,7 +136,7 @@ class ViewHomePage(request_handler.RequestHandler):
         thumbnail_link_sets = new_and_noteworthy_link_sets()
 
         # If all else fails, just show the TED talk on the homepage
-        video_id, video_key, found_marquee_video = "gM95HHI4gLk", "", False
+        video_id, video_key = "gM95HHI4gLk", ""
 
         if len(thumbnail_link_sets) > 1:
 
@@ -147,7 +148,8 @@ class ViewHomePage(request_handler.RequestHandler):
             # Switch up the marquee video on a daily basis
             marquee_videos = []
             for thumbnail_link_set in thumbnail_link_sets:
-                marquee_videos += filter(lambda item: item["marquee"], thumbnail_link_set)
+                marquee_videos += filter(lambda item: item["marquee"],
+                                         thumbnail_link_set)
 
             if marquee_videos:
                 marquee_video = marquee_videos[day % len(marquee_videos)]

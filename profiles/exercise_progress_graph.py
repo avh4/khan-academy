@@ -22,7 +22,7 @@ def exercise_progress_graph_context(user_data_student):
         color = "transparent"
         exercise_display = Exercise.to_display_name(exercise.name)
         ex_link = "/exercises?exid="+exercise.name
-        hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % ( exercise_display, "Not Started", 0, 0)
+        hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Progress: %s</em><br/><em>Problems attempted: %s</em>" % ( exercise_display, "Not Started", '0%', 0)
 
         chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user_data_student.email, exercise.name) 
                 
@@ -47,9 +47,9 @@ def exercise_progress_graph_context(user_data_student):
             color = "started"
 
         if len(status) > 0:
-            hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (exercise_display, 
+            hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Progress: %s</em><br/><em>Problems attempted: %s</em>" % (exercise_display, 
                         status, 
-                        graph_dict["streak"],
+                        UserExercise.to_progress_display(graph_dict["progress"]),
                         graph_dict["total_done"])
 
         exercise_data[exercise.name] = {

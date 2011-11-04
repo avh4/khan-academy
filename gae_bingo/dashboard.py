@@ -1,12 +1,13 @@
 import logging
+import csv
 import os
+import StringIO
+import urllib
 
-from google.appengine.ext.webapp import template, RequestHandler
-
-from .gae_bingo import choose_alternative, delete_experiment, resume_experiment
+from google.appengine.ext.webapp import RequestHandler
+from .config import can_control_experiments
 from .cache import BingoCache
 from .stats import describe_result_in_words
-from .config import can_control_experiments
 
 class Dashboard(RequestHandler):
 
@@ -16,51 +17,64 @@ class Dashboard(RequestHandler):
             self.redirect("/")
             return
 
-        path = os.path.join(os.path.dirname(__file__), "templates/dashboard.html")
+        path = os.path.join(os.path.dirname(__file__), "templates/base.html")
+        f = None
+
+        try:
+            f = open(path, "r")
+            html = f.read()
+        finally:
+            if f:
+                f.close()
+
+        self.response.out.write(html)
+
+class Export(RequestHandler):
+
+    def get(self):
+
+        if not can_control_experiments():
+            self.redirect("/")
+            return
 
         bingo_cache = BingoCache.get()
 
-        experiment_results = []
-        for experiment_name in bingo_cache.experiments:
+        canonical_name = self.request.get("canonical_name")
+        experiments, alternatives = bingo_cache.experiments_and_alternatives_from_canonical_name(canonical_name)
 
-            experiment = bingo_cache.get_experiment(experiment_name)
-            alternatives = bingo_cache.get_alternatives(experiment_name)
+        if not experiments:
+            raise Exception("No experiments matching canonical name: %s" % canonical_name)
 
-            experiment_results.append([
-                experiment,
-                alternatives,
-                reduce(lambda a, b: a + b, map(lambda alternative: alternative.participants, alternatives)),
-                reduce(lambda a, b: a + b, map(lambda alternative: alternative.conversions, alternatives)),
-                describe_result_in_words(alternatives),
-            ])
+        f = StringIO.StringIO()
 
-        experiment_results = sorted(experiment_results, key=lambda results: results[0].name)
+        try:
 
-        self.response.out.write(
-            template.render(path, {
-                "experiment_results": experiment_results,
-            })
-        )
+            writer = csv.writer(f, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-class ControlExperiment(RequestHandler):
+            writer.writerow(["EXPERIMENT: %s" % canonical_name])
+            writer.writerow([])
+            writer.writerow([])
 
-    def post(self):
+            for experiment, alternatives in zip(experiments, alternatives):
 
-        if not can_control_experiments():
-            return
+                writer.writerow(["CONVERSION NAME: %s" % experiment.conversion_name])
+                writer.writerow([])
 
-        action = self.request.get("action")
+                writer.writerow(["ALTERNATIVE NUMBER", "CONTENT", "PARTICIPANTS", "CONVERSIONS", "CONVERSION RATE"])
+                for alternative in alternatives:
+                    writer.writerow([alternative.number, alternative.content, alternative.participants, alternative.conversions, alternative.conversion_rate])
 
-        experiment_name = self.request.get("experiment_name")
+                writer.writerow([])
+                writer.writerow(["SIGNIFICANCE TEST RESULTS: %s" % describe_result_in_words(alternatives)])
+                writer.writerow([])
 
-        if not experiment_name:
-            return
+                writer.writerow([])
+                writer.writerow([])
 
-        if action == "choose_alternative":
-            choose_alternative(experiment_name, int(self.request.get("alternative_number")))
-        elif action == "delete":
-            delete_experiment(experiment_name)
-        elif action == "resume":
-            resume_experiment(experiment_name)
+            self.response.headers["Content-Type"] = "text/csv"
+            self.response.headers["Content-Disposition"] = "attachment; filename=gae_bingo-%s.csv" % urllib.quote(canonical_name)
+            self.response.out.write(f.getvalue())
 
-        self.redirect("/gae_bingo/dashboard")
+        finally:
+
+            f.close()

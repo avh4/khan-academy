@@ -64,3 +64,7 @@ class RateLimiter:
 class VoteRateLimiter(RateLimiter):
     def __init__(self, user_data):
         RateLimiter.__init__(self, user_data, 10, "You can only vote %s times every hour.")
+
+class FlagRateLimiter(RateLimiter):
+    def __init__(self, user_data):
+        RateLimiter.__init__(self, user_data, 10, "You can only flag %s times every hour.")

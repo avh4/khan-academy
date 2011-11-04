@@ -59,14 +59,14 @@
                     Longest Streak
                 </th>
                 <th>
-                    Current Streak
+                    Progress
                 </th>
                 <th>
                     Prerequisites
                 </th>
             </tr>
             {% for graph_dict in graph_dicts %}
-            <tr data-id="{{ graph_dict.name }}" data-points="{{ graph_dict.points }}" data-name="{{ graph_dict.display_name }}" data-status="{{ graph_dict.status }}" data-longest_streak='{{ graph_dict.longest_streak }}' data-streak='{{ graph_dict.streak }}' data-h_position='{{ graph_dict.h_position }}' data-v_position='{{ graph_dict.v_position }}' data-summative='{{ graph_dict.summative }}'>
+            <tr data-id="{{ graph_dict.name }}" data-points="{{ graph_dict.points }}" data-name="{{ graph_dict.display_name }}" data-status="{{ graph_dict.status }}" data-longest_streak='{{ graph_dict.longest_streak }}' data-progress='{{ graph_dict.progress }}' data-h_position='{{ graph_dict.h_position }}' data-v_position='{{ graph_dict.v_position }}' data-summative='{{ graph_dict.summative }}'>
                 <td class="points">
                     {{ graph_dict.points }}
                 </td>
@@ -79,8 +79,8 @@
                 <td class="longest_streak">
                     {{ graph_dict.longest_streak }}
                 </td>
-                <td class="streak">
-                    {{ graph_dict.streak }}
+                <td class="progress">
+                    {{ graph_dict.progress }}
                 </td>
                 <td class="prereqs">
                     <ul>
