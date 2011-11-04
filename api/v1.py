@@ -1,5 +1,4 @@
 import copy
-import datetime
 import logging
 
 from flask import request, current_app
@@ -13,7 +12,6 @@ from badges.templatetags import badge_notifications_html
 from phantom_users.templatetags import login_notifications_html
 from exercises import attempt_problem, reset_streak
 from phantom_users.phantom_util import api_create_phantom
-import util
 import notifications
 from gae_bingo.gae_bingo import bingo
 from autocomplete import video_title_dicts, playlist_title_dicts
@@ -23,8 +21,6 @@ from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional, admin_required, developer_required
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
-
-import simplejson as json
 
 # add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
 # case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
@@ -353,8 +349,6 @@ def user_videos_specific(youtube_id):
 @jsonify
 def log_user_video(youtube_id):
     user_data = models.UserData.current()
-
-    points = 0
     video_log = None
 
     if user_data and youtube_id:
@@ -379,31 +373,33 @@ def user_exercises_all():
     user_data = models.UserData.current()
 
     if user_data:
-        user_data_student = get_visible_user_data_from_request()
+        student = get_visible_user_data_from_request()
 
-        if user_data_student:
+        if student:
             exercises = models.Exercise.get_all_use_cache()
-            user_exercise_graph = models.UserExerciseGraph.get(user_data_student)
-            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
+            user_exercise_graph = models.UserExerciseGraph.get(student)
+            user_exercises = (models.UserExercise.all().
+                              filter("user =", student.user).
+                              fetch(10000))
 
-            exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
-            user_exercises_dict = dict((user_exercise.exercise, user_exercise) for user_exercise in user_exercises)
+            user_exercises_dict = dict((user_exercise.exercise, user_exercise)
+                                       for user_exercise in user_exercises)
 
-            for exercise_name in exercises_dict:
-                if not exercise_name in user_exercises_dict:
+            results = []
+            for exercise in exercises:
+                name = exercise.name
+                if name not in user_exercises_dict:
                     user_exercise = models.UserExercise()
-                    user_exercise.exercise = exercise_name
-                    user_exercise.user = user_data_student.user
-                    user_exercises_dict[exercise_name] = user_exercise
-
-            for exercise_name in user_exercises_dict:
-                # Make sure this exercise still exists
-                if exercise_name in exercises_dict:
-                    user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
-                    user_exercises_dict[exercise_name]._user_data = user_data_student
-                    user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
-
-            return user_exercises_dict.values()
+                    user_exercise.exercise = name
+                    user_exercise.user = student.user
+                else:
+                    user_exercise = user_exercises_dict[name]
+                user_exercise.exercise_model = exercise
+                user_exercise._user_data = student
+                user_exercise._user_exercise_graph = user_exercise_graph
+                results.append(user_exercise)
+                
+            return results
 
     return None
 
