@@ -1636,7 +1636,7 @@ class LogSummary(db.Model):
     start = db.DateTimeProperty()
     end = db.DateTimeProperty()
     summary_type = db.StringProperty() 
-    summary = object_property.ObjectProperty()
+    summary = object_property.UnvalidatedObjectProperty()
     name = db.StringProperty(required=True) 
 
     @staticmethod
