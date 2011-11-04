@@ -111,19 +111,19 @@ class Bingo(RequestHandler):
         self.response.headers['Content-Type'] = 'text/json'
 
         experiment_names = bingo_cache.get_experiment_names_by_conversion_name(conversion)
-        
+
         status = 200
         response = None
         
         if conversion:
             
-            if len(experiment_names) > 0:
+            if experiment_names:
                 # send null message and score the conversion
                 status = 204
                 bingo(conversion)
             
             else:
-                # send error
+                # send error, conversion not found
                 status = 404
         
         else:

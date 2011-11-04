@@ -32,3 +32,4 @@ queue:
 
 - name: fancy-exercise-stats-queue
   rate: 1/s
+
