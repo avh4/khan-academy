@@ -14,6 +14,8 @@ from oauth_provider.oauth import OAuthError
 import util
 import models
 
+# TODO: rename this to be something more generic, since it's not just
+# oauth specific.
 def oauth_required(require_anointed_consumer = False):
     """ Decorator for validating an authenticated request.
 
@@ -22,7 +24,8 @@ def oauth_required(require_anointed_consumer = False):
         2. using cookie auth with a valid XSRF token presented in a header
 
     If a valid user is not retrieved from either of the two methods, an error
-    is returned.
+    is returned. Note that phantom users with exercise data is considered
+    a valid user.
 
     """
     def outer_wrapper(func):
@@ -31,7 +34,7 @@ def oauth_required(require_anointed_consumer = False):
             if is_valid_request(request):
                 try:
                     consumer, token, parameters = validate_token(request)
-                    if not (consumer or token):
+                    if (not consumer) or (not token):
                         return oauth_error_response(OAuthError(
                                 "Not valid consumer or token"))
                     # If this API method requires an anointed consumer,
