@@ -759,6 +759,8 @@ def set_css_deferred(user_data_key, video_key, status, version):
     uvc.version = version
     db.put(uvc)
 
+PRE_PHANTOM_EMAIL = "http://nouserid.khanacademy.org/pre-phantom-user-2"
+
 class UserData(GAEBingoIdentityModel, db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
@@ -867,12 +869,15 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     @staticmethod
     def pre_phantom():
-        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user-2"
-        return UserData.insert_for(pre_phantom_email, pre_phantom_email)
+        return UserData.insert_for(PRE_PHANTOM_EMAIL, PRE_PHANTOM_EMAIL)
 
     @property
     def is_phantom(self):
         return util.is_phantom_user(self.user_id)
+    
+    @property
+    def is_pre_phantom(self):
+        return PRE_PHANTOM_EMAIL == self.user_email
 
     @property
     def seconds_since_joined(self):
