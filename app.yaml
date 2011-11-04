@@ -110,10 +110,6 @@ handlers:
   script: mapreduce/main.py
   login: admin
 
-- url: /api/[^/]+/admin/.*
-  script: api/main.py
-  login: admin
-
 - url: /api/.*
   script: api/main.py
 
