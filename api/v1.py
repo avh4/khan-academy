@@ -803,3 +803,15 @@ def autocomplete():
             "videos": video_results, 
             "playlists": playlist_results
     }
+
+@route("/api/v1/dev/problems", methods=["GET"])
+@oauth_required()
+@developer_required
+@jsonp
+@jsonify
+def problem_logs():
+    problem_log_query = models.ProblemLog.all()
+    filter_query_by_request_dates(problem_log_query, "time_done")
+    problem_log_query.order("time_done")
+
+    return problem_log_query.fetch(request.request_int("max", default=500))

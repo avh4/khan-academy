@@ -10,7 +10,7 @@ javascript = {
             "pageutil.js",
             "api.js",
             "social.js",
-            "gae_bingo.js",
+            "../../gae_bingo/static/js/gae_bingo.js",
         ]
     },
     "video": {

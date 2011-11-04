@@ -61,6 +61,7 @@ from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
+import redirects
 import robots
 
 class VideoDataTest(request_handler.RequestHandler):
@@ -924,6 +925,11 @@ application = webapp2.WSGIApplication([
     ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
 
     ('/robots.txt', robots.RobotsTxt),
+
+    ('/r/.*', redirects.Redirect),
+    ('/redirects', redirects.List),
+    ('/redirects/add', redirects.Add),
+    ('/redirects/remove', redirects.Remove),
 
     # Redirect any links to old JSP version
     ('/.*\.jsp', PermanentRedirectToHome),
