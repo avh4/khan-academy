@@ -2,56 +2,34 @@ total_storage_limit: 999M
 queue:
 - name: badge-statistics-queue
   rate: 5/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: exercise-statistics-mapreduce-queue
   rate: 5/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: backfill-mapreduce-queue
   rate: 5/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: youtube-sync-queue
   rate: 5/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: voting-queue
   rate: 5/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: problem-log-queue
   rate: 80/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: video-log-queue
   rate: 60/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: log-summary-queue
   rate: 60/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: fast-background-queue
   rate: 10/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: slow-background-queue
   rate: 10/s
-  acl:
-  - user_email: james@khanacademy.org
 
 - name: fancy-exercise-stats-queue
   rate: 1/s
-  acl:
-  - user_email: james@khanacademy.org
 
