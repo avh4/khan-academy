@@ -31,16 +31,24 @@ def class_exercises_over_time_graph_context(user_data, student_list):
     dict_student_exercises = {}
     dict_exercises = {}
 
+    async_queries = []
     for user_data_student in students_data:
-        student_nickname = user_data_student.nickname
-        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": user_data_student.email, "exercises": [] }
-
         query = models.UserExercise.all()
         query.filter('user =', user_data_student.user)
         query.filter('proficient_date >', None)
         query.order('proficient_date')
+        async_queries.append(query)
+
+    # Wait for all queries to finish
+    results = util.async_queries(async_queries, limit=10000)
+
+    for i, user_data_student in enumerate(students_data):
+        student_nickname = user_data_student.nickname
+        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": user_data_student.email, "exercises": [] }
         
-        for user_exercise in query:
+        exercises = results[i].get_result()
+
+        for user_exercise in exercises:
             joined = min(user_data.joined, user_exercise.proficient_date)
             days_until_proficient = (user_exercise.proficient_date - joined).days
             proficient_date = user_exercise.proficient_date.strftime('%m/%d/%Y')

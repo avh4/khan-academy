@@ -54,6 +54,18 @@ def get_graph_url(graph_type, student, coach, list_id):
     urlpath = "/profile/graph/%s" % graph_type
     return urlunparse(('', '', urlpath, '', urlencode(qs), ''))
 
+def get_api_url(api_function, student, coach, list_id):
+    qs = {}
+    if student:
+        qs['student_email'] = student.email
+    if coach:
+        qs['coach_email'] = coach.email
+    if list_id:
+        qs['list_id'] = list_id
+
+    urlpath = "/api/v1/%s" % api_function
+    return urlunparse(('', '', urlpath, '', urlencode(qs), ''))
+
 def profile_recent_activity(user_data, view="standard"):
     context = recent_activity.recent_activity_context(user_data)
     context["view"] = view

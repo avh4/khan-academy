@@ -1,22 +1,13 @@
 import os
 import Cookie
 import logging
-import unicodedata
-import urllib2
 import hashlib
 from functools import wraps
 
-from google.appengine.api import users
-from google.appengine.api import memcache
-from google.appengine.api import urlfetch
-
-from app import App
-import layer_cache
-import request_cache
-import util
 import models
 from cookie_util import set_request_cookie
 
+# TODO: consolidate this with the constants in models.py:UserData
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
 PHANTOM_MORSEL_KEY = 'ureg_id'
 
