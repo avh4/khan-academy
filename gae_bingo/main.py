@@ -15,6 +15,7 @@ application = webapp.WSGIApplication([
     ("/gae_bingo/api/v1/experiments/summary", api.ExperimentSummary),
     ("/gae_bingo/api/v1/experiments/conversions", api.ExperimentConversions),
     ("/gae_bingo/api/v1/experiments/control", api.ControlExperiment),
+    ("/gae_bingo/api/v1/debug/alternatives_for_id", api.AlternativesForIdentity),
 ])
 application = middleware.GAEBingoWSGIMiddleware(application)
 
