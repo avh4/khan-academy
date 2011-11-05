@@ -1,14 +1,19 @@
-
 import cookie_util
 import base64
 import os
 from functools import wraps
-import logging
 
 XSRF_COOKIE_KEY = "fkey"
 XSRF_HEADER_KEY = "HTTP_X_KA_FKEY"
 
 def ensure_xsrf_cookie(func):
+    """ This is a decorator for a method that ensures when the response to
+    this request is sent, the user's browser has the appropriate XSRF cookie
+    set.
+    
+    The XSRF cookie is required for making successful API calls from our site
+    for calls that require oauth.
+    """
     @wraps(func)
     def wrapper(self, *args, **kwargs):
 

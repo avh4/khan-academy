@@ -10,7 +10,8 @@ javascript = {
             "pageutil.js",
             "api.js",
             "social.js",
-            "gae_bingo.js",
+            "../../gae_bingo/static/js/gae_bingo.js",
+            "underscore.js",
         ]
     },
     "video": {
@@ -87,7 +88,6 @@ javascript = {
             "utils/interactive.js",
             "utils/jquery-color.js",
             "utils/jquery.mobile.vmouse.js",
-            "utils/kinematics.js",
             "utils/math-format.js",
             "utils/math.js",
             "utils/parabola-intuition.js",

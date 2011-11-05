@@ -8,13 +8,22 @@
 </div>
 {%- endmacro %}
 
-{% macro graph_link(user_data, graph_name, graph_type, selected_graph_type) -%}
-<a href="{{ profiles.get_graph_url(graph_type, user_data, None, None) }}" class="graph-link graph-link-header header {% if graph_type == selected_graph_type %}graph-link-selected{% endif %}">{{ graph_name|escape }}</a>
+{% macro graph_link(user_data, graph_name, graph_type, selected_type) -%}
+<a href="{{ profiles.get_graph_url(graph_type, user_data, None, None) }}" class="graph-link graph-link-header header {% if graph_type == selected_type %}graph-link-selected{% endif %}">{{ graph_name|escape }}</a>
 {%- endmacro %}
 
-{% macro class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id) -%}
-<a href="{{ profiles.get_graph_url(graph_type, None, user_data_coach, list_id) }}" class="graph-link graph-link-header header {% if graph_type == selected_graph_type %}graph-link-selected{% endif %}">{{ graph_name|escape }}</a>
+{% macro class_graph_link(user_data_coach, graph_name, graph_type, selected_type, list_id) -%}
+<a href="{{ profiles.get_graph_url(graph_type, None, user_data_coach, list_id) }}" class="graph-link graph-link-header header {% if graph_type == selected_type %}graph-link-selected{% endif %}">{{ graph_name|escape }}</a>
 {%- endmacro %}
+
+{% macro api_link(user_data, page_name, api_function, selected_function) -%}
+<a href="{{ profiles.get_api_url(api_function, user_data, None, None) }}" class="graph-link graph-link-header header {% if api_function == selected_function %}graph-link-selected{% endif %}">{{ page_name|escape }}</a>
+{%- endmacro %}
+
+{% macro class_api_link(user_data_coach, page_name, api_function, selected_type, list_id) -%}
+<a href="{{ profiles.get_api_url(api_function, None, user_data_coach, list_id) }}" class="graph-link graph-link-header header {% if api_function == selected_type %}graph-link-selected{% endif %}">{{ page_name|escape }}</a>
+{%- endmacro %}
+
 
 {% macro graph_calendar_picker(user_data, graph_type) -%}
 <input type="text" id="targetDatepicker" value="Today"/>

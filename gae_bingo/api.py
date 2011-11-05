@@ -93,6 +93,7 @@ class ExperimentConversions(RequestHandler):
         for alternative in alternatives:
             alternative.live = experiment.live
             alternative.is_short_circuited = (not experiment.live) and (experiment.short_circuit_content == alternative.content)
+            alternative.load_latest_counts()
 
         context = {
                 "canonical_name": experiment.canonical_name,
