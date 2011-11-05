@@ -281,7 +281,7 @@ class Exercise(db.Model):
     @staticmethod
     @layer_cache.cache(expiration=3600)
     def get_count():
-        return Exercise.all().count()
+        return Exercise.all(live_only=True).count()
 
     def put(self):
         Setting.cached_exercises_date(str(datetime.datetime.now()))
